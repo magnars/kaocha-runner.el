@@ -4,7 +4,8 @@
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
 ;; Version: 0.1.0
-;; Package-Requires: ((s "1.4.0") (cider "0.21.0") (edn "1.1.2"))
+;; Package-Requires: ((emacs "26") (s "1.4.0") (cider "0.21.0") (edn "1.1.2"))
+;; URL: https://github.com/magnars/kaocha-runner.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -29,13 +30,13 @@
 (require 'edn)
 (require 's)
 
-(defun kaocha--eval-clojure-code-sync (code)
+(defun kaocha-runner--eval-clojure-code-sync (code)
   (cider-nrepl-sync-request:eval
    code
    (cider-current-repl nil 'ensure)
    (cider-current-ns)))
 
-(defun kaocha--eval-clojure-code (code callback)
+(defun kaocha-runner--eval-clojure-code (code callback)
   (cider-nrepl-request:eval
    code
    callback
@@ -43,26 +44,26 @@
    nil nil nil
    (cider-current-repl nil 'ensure)))
 
-(setq kaocha--out-buffer "*kaocha-output*")
-(setq kaocha--err-buffer "*kaocha-error*")
+(setq kaocha-runner--out-buffer "*kaocha-output*")
+(setq kaocha-runner--err-buffer "*kaocha-error*")
 
-(defun kaocha--clear-buffer (buffer)
+(defun kaocha-runner--clear-buffer (buffer)
   (get-buffer-create buffer)
   (with-current-buffer buffer
     (delete-region (point-min) (point-max))))
 
-(defun kaocha--colorize ()
+(defun kaocha-runner--colorize ()
   (save-excursion
     (goto-char (point-min))
     (insert "[m")
     (ansi-color-apply-on-region (point-min) (point-max))))
 
-(defun kaocha--insert (buffer s)
+(defun kaocha-runner--insert (buffer s)
   (with-current-buffer buffer
     (insert s)
-    (kaocha--colorize)))
+    (kaocha-runner--colorize)))
 
-(defmacro with-kaocha-window (buffer original-buffer &rest body)
+(defmacro kaocha-runner--with-window (buffer original-buffer &rest body)
   (declare (debug (form body))
            (indent 2))
   `(let ((window (get-buffer-window ,buffer)))
@@ -75,29 +76,29 @@
      ,@body
      (switch-to-buffer-other-window original-buffer)))
 
-(defun kaocha--fit-window-snuggly (min-height max-height)
+(defun kaocha-runner--fit-window-snuggly (min-height max-height)
   (window-resize nil (- (max min-height
                              (min max-height
                                   (- (line-number-at-pos (point-max))
                                      (line-number-at-pos (point)))))
                         (window-height))))
 
-(defun kaocha--recenter-top ()
+(defun kaocha-runner--recenter-top ()
   (recenter (min (max 0 scroll-margin)
                  (truncate (/ (window-body-height) 4.0)))))
 
-(defun kaocha--num-warnings ()
+(defun kaocha-runner--num-warnings ()
   (s-count-matches "WARNING:"
-                   (with-current-buffer kaocha--err-buffer
+                   (with-current-buffer kaocha-runner--err-buffer
                      (buffer-substring-no-properties (point-min) (point-max)))))
 
-(defun kaocha--show-report (value current-ns)
+(defun kaocha-runner--show-report (value current-ns)
   (when-let* ((result (edn-read (s-chop-prefix "#:kaocha.result" value))))
     (let* ((tests (gethash :count result))
            (pass (gethash :pass result))
            (fail (gethash :fail result))
            (err (gethash :error result))
-           (warnings (kaocha--num-warnings))
+           (warnings (kaocha-runner--num-warnings))
            (happy? (and (= 0 fail) (= 0 err)))
            (report (format "[%s] %s"
                            current-ns
@@ -117,28 +118,28 @@
                                (propertize warnings-str 'face '(:foreground "yellow"))))))
       (message "%s" report))))
 
-(setq kaocha--fail-re "\\(FAIL\\|ERROR\\)")
+(setq kaocha-runner--fail-re "\\(FAIL\\|ERROR\\)")
 
-(defun kaocha--show-details-window (original-buffer min-height)
-  (with-kaocha-window kaocha--out-buffer original-buffer
+(defun kaocha-runner--show-details-window (original-buffer min-height)
+  (kaocha-runner--with-window kaocha-runner--out-buffer original-buffer
     (visual-line-mode 1)
     (goto-char (point-min))
     (let ((case-fold-search nil))
-      (re-search-forward kaocha--fail-re nil t))
+      (re-search-forward kaocha-runner--fail-re nil t))
     (end-of-line)
-    (kaocha--fit-window-snuggly min-height 16)
-    (kaocha--recenter-top)))
+    (kaocha-runner--fit-window-snuggly min-height 16)
+    (kaocha-runner--recenter-top)))
 
-(defcustom kaocha--repl-invocation-template
+(defcustom kaocha-runner--repl-invocation-template
   "(do (require 'kaocha.repl) %s)"
   "The invocation sent to the REPL to run kaocha tests, with the actual run replaced by %s.")
 
-(defun kaocha--run-tests (&optional run-all? background?)
+(defun kaocha-runner--run-tests (&optional run-all? background?)
   (interactive)
-  (kaocha--clear-buffer kaocha--out-buffer)
-  (kaocha--clear-buffer kaocha--err-buffer)
-  (kaocha--eval-clojure-code
-   (format kaocha--repl-invocation-template (if run-all?
+  (kaocha-runner--clear-buffer kaocha-runner--out-buffer)
+  (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
+  (kaocha-runner--eval-clojure-code
+   (format kaocha-runner--repl-invocation-template (if run-all?
                                                 "(kaocha.repl/run-all)"
                                               "(kaocha.repl/run)"))
    (lexical-let ((current-ns (cider-current-ns))
@@ -148,54 +149,54 @@
                  (shown-details? nil)
                  (the-value nil))
      (if run-all?
-         (kaocha--show-details-window original-buffer 12)
+         (kaocha-runner--show-details-window original-buffer 12)
        (unless background?
          (message "[%s] Running tests ..." current-ns)))
      (lambda (response)
        (nrepl-dbind-response response (content-type content-transfer-encoding body
                                                     value ns out err status id)
          (when out
-           (kaocha--insert kaocha--out-buffer out)
+           (kaocha-runner--insert kaocha-runner--out-buffer out)
            (when (let ((case-fold-search nil))
-                   (string-match-p kaocha--fail-re out))
+                   (string-match-p kaocha-runner--fail-re out))
              (setq any-errors? t)))
          (when err
-           (kaocha--insert kaocha--err-buffer err))
+           (kaocha-runner--insert kaocha-runner--err-buffer err))
          (when value
            (setq the-value value))
          (when (and status (member "done" status))
            (setq done? t))
          (when done?
            (if the-value
-               (kaocha--show-report the-value current-ns)
-             (unless (get-buffer-window kaocha--err-buffer 'visible)
+               (kaocha-runner--show-report the-value current-ns)
+             (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
                (message "Kaocha run failed. See error window for details.")
-               (switch-to-buffer-other-window kaocha--err-buffer))))
+               (switch-to-buffer-other-window kaocha-runner--err-buffer))))
          (when (and done? any-errors? (not shown-details?))
            (setq shown-details? t)
-           (kaocha--show-details-window original-buffer 4)))))))
+           (kaocha-runner--show-details-window original-buffer 4)))))))
 
-(defun kaocha-hide-windows ()
+(defun kaocha-runner-hide-windows ()
   (interactive)
-  (when (get-buffer kaocha--out-buffer)
-    (kill-buffer kaocha--out-buffer))
-  (when (get-buffer kaocha--err-buffer)
-    (kill-buffer kaocha--err-buffer)))
+  (when (get-buffer kaocha-runner--out-buffer)
+    (kill-buffer kaocha-runner--out-buffer))
+  (when (get-buffer kaocha-runner--err-buffer)
+    (kill-buffer kaocha-runner--err-buffer)))
 
-(defun kaocha-run-tests (&optional run-all?)
+(defun kaocha-runner-run-tests (&optional run-all?)
   "Run tests in the current namespace. With a prefix argument, run all tests."
   (interactive "P")
-  (kaocha-hide-windows)
-  (kaocha--run-tests run-all?))
+  (kaocha-runner-hide-windows)
+  (kaocha-runner--run-tests run-all?))
 
-(defun kaocha-show-warnings (&optional switch-to-buffer?)
+(defun kaocha-runner-show-warnings (&optional switch-to-buffer?)
   (interactive "P")
   (if switch-to-buffer?
-      (switch-to-buffer-other-window kaocha--err-buffer)
+      (switch-to-buffer-other-window kaocha-runner--err-buffer)
     (message "%s"
              (s-trim
-              (with-current-buffer kaocha--err-buffer
+              (with-current-buffer kaocha-runner--err-buffer
                 (buffer-substring (point-min) (point-max)))))))
 
-(provide 'kaocha)
+(provide 'kaocha-runner)
 ;;; kaocha-runner.el ends here

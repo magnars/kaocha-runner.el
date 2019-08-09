@@ -2,6 +2,9 @@
 
 An emacs package for running Kaocha tests via CIDER.
 
+**Breaking:** Commands in this package are now prefixed with `kaocha-runner-`
+instead of just `kaocho-`. Update your keybindings accordingly.
+
 ## Installation
 
 I highly recommend installing kaocha-runner through elpa.
@@ -20,17 +23,17 @@ skip that if you want to run it from the repl.
 
 Kaocha runner exposes three commands:
 
-- `kaocha-run-tests`
+- `kaocha-runner-run-tests`
 
    Runs tests in the current namespace. With a prefix argument, it runs all tests.
 
-- `kaocha-show-warnings`
+- `kaocha-runner-show-warnings`
 
    If you get any warnings from Kaocha, the report will just say *1 warning*.
    You can display this warning with this command. Given a prefix argument, it
    displays the warnings in a separate window.
 
-- `kaocha-hide-windows`
+- `kaocha-runner-hide-windows`
 
    When displaying results, kaocha-runner pops up a window. This command hides
    it again. You can also switch to the window and kill it normally, if you
@@ -41,9 +44,9 @@ Kaocha runner exposes three commands:
 Pick your own. Here are mine:
 
 ```cl
-(define-key clojure-mode-map (kbd "C-c k r") 'kaocha-run-tests)
-(define-key clojure-mode-map (kbd "C-c k w") 'kaocha-show-warnings)
-(define-key clojure-mode-map (kbd "C-c k h") 'kaocha-hide-windows)
+(define-key clojure-mode-map (kbd "C-c k r") 'kaocha-runner-run-tests)
+(define-key clojure-mode-map (kbd "C-c k w") 'kaocha-runner-show-warnings)
+(define-key clojure-mode-map (kbd "C-c k h") 'kaocha-runner-hide-windows)
 ```
 
 ## Configuration
@@ -57,7 +60,7 @@ By default, kaocha-runner does this when running tests:
 In other words, it does not evaluate your code in any way. You'll have to
 evaluate the code first, with a `(reset)` or just `C-c C-k` in the buffer.
 
-To remedy this, you can change the `kaocha--repl-invocation-template` to include
+To remedy this, you can change the `kaocha-runner--repl-invocation-template` to include
 a reset of your choice.
 
 Also, if you want to shave ~150ms from each test run, you can remove the require
