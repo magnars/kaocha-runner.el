@@ -165,8 +165,12 @@
            (setq the-value value))
          (when (and status (member "done" status))
            (setq done? t))
-         (when (and done? the-value)
-           (kaocha--show-report the-value current-ns))
+         (when done?
+           (if the-value
+               (kaocha--show-report the-value current-ns)
+             (unless (get-buffer-window kaocha--err-buffer 'visible)
+               (message "Kaocha run failed. See error window for details.")
+               (switch-to-buffer-other-window kaocha--err-buffer))))
          (when (and done? any-errors? (not shown-details?))
            (setq shown-details? t)
            (kaocha--show-details-window original-buffer 4)))))))
