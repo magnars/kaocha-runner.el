@@ -1,4 +1,4 @@
-;;; kaocha-runner.el --- A package for running Kaocha tests via CIDER.
+;;; kaocha-runner.el --- A package for running Kaocha tests via CIDER. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Magnar Sveen
 
@@ -150,14 +150,14 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
   (kaocha-runner--eval-clojure-code
    (format kaocha-runner--repl-invocation-template (if run-all?
-                                                "(kaocha.repl/run-all)"
-                                              "(kaocha.repl/run)"))
-   (lexical-let ((current-ns (cider-current-ns))
-                 (original-buffer (current-buffer))
-                 (done? nil)
-                 (any-errors? nil)
-                 (shown-details? nil)
-                 (the-value nil))
+                                                       "(kaocha.repl/run-all)"
+                                                     "(kaocha.repl/run)"))
+   (let ((current-ns (cider-current-ns))
+         (original-buffer (current-buffer))
+         (done? nil)
+         (any-errors? nil)
+         (shown-details? nil)
+         (the-value nil))
      (if run-all?
          (kaocha-runner--show-details-window original-buffer 12)
        (unless background?
