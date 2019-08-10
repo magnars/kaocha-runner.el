@@ -213,6 +213,13 @@ Prefix argument RUN-ALL? runs all tests."
   (kaocha-runner--run-tests run-all?))
 
 ;;;###autoload
+(defun kaocha-runner-run-all-tests ()
+  "Run all tests. "
+  (interactive)
+  (kaocha-runner-hide-windows)
+  (kaocha-runner--run-tests t))
+
+;;;###autoload
 (defun kaocha-runner-show-warnings (&optional switch-to-buffer?)
   "Display warnings from the last kaocha test run.
 Prefix argument SWITCH-TO-BUFFER? opens a separate window."

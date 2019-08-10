@@ -27,6 +27,11 @@ Kaocha runner exposes three commands:
 
    Runs tests in the current namespace. With a prefix argument, it runs all tests.
 
+- `kaocha-runner-run-all-tests`
+
+   If you want to bind a key for running all tests directly, without having to
+   prefix it, this is the command for you.
+
 - `kaocha-runner-show-warnings`
 
    If you get any warnings from Kaocha, the report will just say *1 warning*.
@@ -45,6 +50,7 @@ Pick your own. Here are mine:
 
 ```cl
 (define-key clojure-mode-map (kbd "C-c k r") 'kaocha-runner-run-tests)
+(define-key clojure-mode-map (kbd "C-c k a") 'kaocha-runner-run-all-tests)
 (define-key clojure-mode-map (kbd "C-c k w") 'kaocha-runner-show-warnings)
 (define-key clojure-mode-map (kbd "C-c k h") 'kaocha-runner-hide-windows)
 ```
