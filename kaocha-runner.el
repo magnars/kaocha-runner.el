@@ -3,8 +3,8 @@
 ;; Copyright (C) 2019 Magnar Sveen
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
-;; Version: 0.1.0
-;; Package-Requires: ((emacs "26") (s "1.4.0") (cider "0.21.0") (edn "1.1.2"))
+;; Version: 0.2.0
+;; Package-Requires: ((emacs "26") (s "1.4.0") (cider "0.21.0") (parseedn "0.1.0"))
 ;; URL: https://github.com/magnars/kaocha-runner.el
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 ;;; Code:
 
 (require 'cider)
-(require 'edn)
+(require 'parseedn)
 (require 's)
 
 (defun kaocha-runner--eval-clojure-code-sync (code)
@@ -93,7 +93,7 @@
                      (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun kaocha-runner--show-report (value current-ns)
-  (when-let* ((result (edn-read (s-chop-prefix "#:kaocha.result" value))))
+  (when-let* ((result (parseedn-read-str (s-chop-prefix "#:kaocha.result" value))))
     (let* ((tests (gethash :count result))
            (pass (gethash :pass result))
            (fail (gethash :fail result))

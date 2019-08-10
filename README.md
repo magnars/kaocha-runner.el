@@ -13,7 +13,7 @@ It should soon be available on [melpa](http://melpa.milkbox.net/):
 
     M-x package-install kaocha-runner
 
-In the meantime, you're set if you have `s`, `cider`, `edn`.
+In the meantime, you're set if you have `s`, `cider`, `parseedn`.
 
 Note that you must include kaocha in your dev dependencies for this to run in
 the repl. The kaocha docs suggests creating a separate `:kaocha` profile, but
