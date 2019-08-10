@@ -165,20 +165,23 @@ If BACKGROUND? is t, we don't message when the tests start running."
          (done? nil)
          (any-errors? nil)
          (shown-details? nil)
-         (the-value nil))
-     (if run-all?
-         (kaocha-runner--show-details-window original-buffer 12)
-       (unless background?
-         (if run-all?
-             (message "Running all tests ...")
-           (message "[%s] Running tests ..." current-ns))))
+         (the-value nil)
+         (start-time (float-time)))
+     (unless background?
+       (if run-all?
+           (message "Running all tests ...")
+         (message "[%s] Running tests ..." current-ns)))
      (lambda (response)
        (nrepl-dbind-response response (value out err status)
          (when out
            (kaocha-runner--insert kaocha-runner--out-buffer out)
            (when (let ((case-fold-search nil))
                    (string-match-p kaocha-runner--fail-re out))
-             (setq any-errors? t)))
+             (setq any-errors? t))
+           (when (and (< 1 (- (float-time) start-time))
+                      (not shown-details?))
+             (setq shown-details? t)
+             (kaocha-runner--show-details-window original-buffer 12)))
          (when err
            (kaocha-runner--insert kaocha-runner--err-buffer err))
          (when value
@@ -191,8 +194,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
              (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
                (message "Kaocha run failed. See error window for details.")
                (switch-to-buffer-other-window kaocha-runner--err-buffer))))
-         (when (and done? any-errors? (not shown-details?))
-           (setq shown-details? t)
+         (when (and done? any-errors?)
            (kaocha-runner--show-details-window original-buffer 4)))))))
 
 ;;;###autoload
