@@ -60,7 +60,7 @@ By default, kaocha-runner does this when running tests:
 In other words, it does not evaluate your code in any way. You'll have to
 evaluate the code first, with a `(reset)` or just `C-c C-k` in the buffer.
 
-To remedy this, you can change the `kaocha-runner--repl-invocation-template` to include
+To remedy this, you can change the `kaocha-runner-repl-invocation-template` to include
 a reset of your choice.
 
 Also, if you want to shave ~150ms from each test run, you can remove the require

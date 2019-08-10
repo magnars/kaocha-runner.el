@@ -18,7 +18,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -30,13 +30,11 @@
 (require 'parseedn)
 (require 's)
 
-;;;###autoload
 (defgroup kaocha-runner nil
   "Run Kaocha tests via CIDER."
   :group 'tools)
 
-;;;###autoload
-(defcustom kaocha-runner--repl-invocation-template
+(defcustom kaocha-runner-repl-invocation-template
   "(do (require 'kaocha.repl) %s)"
   "The invocation sent to the REPL to run kaocha tests, with the actual run replaced by %s."
   :group 'kaocha-runner
@@ -157,7 +155,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (kaocha-runner--clear-buffer kaocha-runner--out-buffer)
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
   (kaocha-runner--eval-clojure-code
-   (format kaocha-runner--repl-invocation-template (if run-all?
+   (format kaocha-runner-repl-invocation-template (if run-all?
                                                        "(kaocha.repl/run-all)"
                                                      "(kaocha.repl/run)"))
    (let ((current-ns (cider-current-ns))
