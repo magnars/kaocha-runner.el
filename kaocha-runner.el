@@ -113,8 +113,10 @@
            (err (gethash :error result))
            (warnings (kaocha-runner--num-warnings))
            (happy? (and (= 0 fail) (= 0 err)))
-           (report (format "[%s] %s"
-                           current-ns
+           (report (format "%s%s"
+                           (if current-ns
+                               (concat "[" current-ns "] ")
+                             "")
                            (propertize (format "%s tests, %s assertions%s, %s failures."
                                                tests
                                                (+ pass fail err)
@@ -156,8 +158,8 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
   (kaocha-runner--eval-clojure-code
    (format kaocha-runner-repl-invocation-template (if run-all?
-                                                       "(kaocha.repl/run-all)"
-                                                     "(kaocha.repl/run)"))
+                                                      "(kaocha.repl/run-all)"
+                                                    "(kaocha.repl/run)"))
    (let ((current-ns (cider-current-ns))
          (original-buffer (current-buffer))
          (done? nil)
@@ -167,7 +169,9 @@ If BACKGROUND? is t, we don't message when the tests start running."
      (if run-all?
          (kaocha-runner--show-details-window original-buffer 12)
        (unless background?
-         (message "[%s] Running tests ..." current-ns)))
+         (if run-all?
+             (message "Running all tests ...")
+           (message "[%s] Running tests ..." current-ns))))
      (lambda (response)
        (nrepl-dbind-response response (value out err status)
          (when out
@@ -183,7 +187,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
            (setq done? t))
          (when done?
            (if the-value
-               (kaocha-runner--show-report the-value current-ns)
+               (kaocha-runner--show-report the-value (unless run-all? current-ns))
              (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
                (message "Kaocha run failed. See error window for details.")
                (switch-to-buffer-other-window kaocha-runner--err-buffer))))
