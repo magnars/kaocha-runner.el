@@ -40,6 +40,12 @@
   :group 'kaocha-runner
   :type 'string)
 
+(defcustom kaocha-runner-extra-configuration
+  "{:kaocha/fail-fast? true}"
+  "Extra configuration options passed to kaocha, a string containing an edn map."
+  :group 'kaocha-runner
+  :type 'string)
+
 (defun kaocha-runner--eval-clojure-code (code callback)
   "Send CODE to be evaled and run to CIDER, calling CALLBACK with updates."
   (cider-nrepl-request:eval
@@ -157,9 +163,11 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (kaocha-runner--clear-buffer kaocha-runner--out-buffer)
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
   (kaocha-runner--eval-clojure-code
-   (format kaocha-runner-repl-invocation-template (if run-all?
-                                                      "(kaocha.repl/run-all)"
-                                                    "(kaocha.repl/run)"))
+   (format kaocha-runner-repl-invocation-template
+           (format (if run-all?
+                       "(kaocha.repl/run-all %s)"
+                     "(kaocha.repl/run %s)")
+                   kaocha-runner-extra-configuration))
    (let ((current-ns (cider-current-ns))
          (original-buffer (current-buffer))
          (done? nil)
@@ -216,7 +224,7 @@ Prefix argument RUN-ALL? runs all tests."
 
 ;;;###autoload
 (defun kaocha-runner-run-all-tests ()
-  "Run all tests. "
+  "Run all tests."
   (interactive)
   (kaocha-runner-hide-windows)
   (kaocha-runner--run-tests t))

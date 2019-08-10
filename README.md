@@ -57,17 +57,30 @@ Pick your own. Here are mine:
 
 ## Configuration
 
-By default, kaocha-runner does this when running tests:
+The way kaocha-runner invokes kaocha is guided by two custom vars:
+
+- `kaocha-runner-repl-invocation-template`
+
+    which defaults to `(do (require 'kaocha.repl) %s)`. The `%s` is replaced
+    with either `(kaocha.repl/run ...)` or `(kaocha.repl/run-all ...)`
+
+- `kaocha-runner-extra-configuration`
+
+    which defaults to `{:kaocha/fail-fast? true}`.
+
+So by default, kaocha-runner does this when running tests:
 
 ```clj
-(do (require 'kaocha.repl) (kaocha.repl/run))
+(do (require 'kaocha.repl) (kaocha.repl/run {:kaocha/fail-fast? true}))
 ```
 
-In other words, it does not evaluate your code in any way. You'll have to
+You can change this by changing the custom vars mentioned above.
+
+Note that kaocha-runner *does not evaluate your code in any way*. You'll have to
 evaluate the code first, with a `(reset)` or just `C-c C-k` in the buffer.
 
-To remedy this, you can change the `kaocha-runner-repl-invocation-template` to include
-a reset of your choice.
+To remedy this, you can change the `kaocha-runner-repl-invocation-template` to
+include a reset of your choice.
 
 Also, if you want to shave ~150ms from each test run, you can remove the require
 from the template. In that case, you'll have to require it yourself.
