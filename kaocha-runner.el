@@ -30,6 +30,18 @@
 (require 'parseedn)
 (require 's)
 
+;;;###autoload
+(defgroup kaocha-runner nil
+  "Run Kaocha tests via CIDER."
+  :group 'tools)
+
+;;;###autoload
+(defcustom kaocha-runner--repl-invocation-template
+  "(do (require 'kaocha.repl) %s)"
+  "The invocation sent to the REPL to run kaocha tests, with the actual run replaced by %s."
+  :group 'kaocha-runner
+  :type 'string)
+
 (defun kaocha-runner--eval-clojure-code (code callback)
   "Send CODE to be evaled and run to CIDER, calling CALLBACK with updates."
   (cider-nrepl-request:eval
@@ -73,7 +85,7 @@
          (switch-to-buffer ,buffer)
          (set-window-dedicated-p window t)))
      ,@body
-     (switch-to-buffer-other-window original-buffer)))
+     (switch-to-buffer-other-window ,original-buffer)))
 
 (defun kaocha-runner--fit-window-snuggly (min-height max-height)
   "Resize current window to fit its contents, within MIN-HEIGHT and MAX-HEIGHT."
@@ -134,10 +146,6 @@
     (kaocha-runner--fit-window-snuggly min-height 16)
     (kaocha-runner--recenter-top)))
 
-(defcustom kaocha-runner--repl-invocation-template
-  "(do (require 'kaocha.repl) %s)"
-  "The invocation sent to the REPL to run kaocha tests, with the actual run replaced by %s.")
-
 (defun kaocha-runner--run-tests (&optional run-all? background?)
   "Run kaocha tests.
 
@@ -163,8 +171,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
        (unless background?
          (message "[%s] Running tests ..." current-ns)))
      (lambda (response)
-       (nrepl-dbind-response response (content-type content-transfer-encoding body
-                                                    value ns out err status id)
+       (nrepl-dbind-response response (value out err status)
          (when out
            (kaocha-runner--insert kaocha-runner--out-buffer out)
            (when (let ((case-fold-search nil))
@@ -186,6 +193,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
            (setq shown-details? t)
            (kaocha-runner--show-details-window original-buffer 4)))))))
 
+;;;###autoload
 (defun kaocha-runner-hide-windows ()
   "Hide all windows that kaocha has opened."
   (interactive)
@@ -194,6 +202,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (when (get-buffer kaocha-runner--err-buffer)
     (kill-buffer kaocha-runner--err-buffer)))
 
+;;;###autoload
 (defun kaocha-runner-run-tests (&optional run-all?)
   "Run tests in the current namespace.
 Prefix argument RUN-ALL? runs all tests."
@@ -201,6 +210,7 @@ Prefix argument RUN-ALL? runs all tests."
   (kaocha-runner-hide-windows)
   (kaocha-runner--run-tests run-all?))
 
+;;;###autoload
 (defun kaocha-runner-show-warnings (&optional switch-to-buffer?)
   "Display warnings from the last kaocha test run.
 Prefix argument SWITCH-TO-BUFFER? opens a separate window."
