@@ -3,7 +3,7 @@
 An emacs package for running Kaocha tests via CIDER.
 
 **Breaking:** Commands in this package are now prefixed with `kaocha-runner-`
-instead of just `kaocho-`. Update your keybindings accordingly.
+instead of just `kaocha-`. Update your keybindings accordingly.
 
 ## Installation
 
