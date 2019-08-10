@@ -30,13 +30,8 @@
 (require 'parseedn)
 (require 's)
 
-(defun kaocha-runner--eval-clojure-code-sync (code)
-  (cider-nrepl-sync-request:eval
-   code
-   (cider-current-repl nil 'ensure)
-   (cider-current-ns)))
-
 (defun kaocha-runner--eval-clojure-code (code callback)
+  "Send CODE to be evaled and run to CIDER, calling CALLBACK with updates."
   (cider-nrepl-request:eval
    code
    callback
@@ -44,26 +39,30 @@
    nil nil nil
    (cider-current-repl nil 'ensure)))
 
-(setq kaocha-runner--out-buffer "*kaocha-output*")
-(setq kaocha-runner--err-buffer "*kaocha-error*")
+(defvar kaocha-runner--out-buffer "*kaocha-output*")
+(defvar kaocha-runner--err-buffer "*kaocha-error*")
 
 (defun kaocha-runner--clear-buffer (buffer)
+  "Ensure that BUFFER exists and is empty."
   (get-buffer-create buffer)
   (with-current-buffer buffer
     (delete-region (point-min) (point-max))))
 
 (defun kaocha-runner--colorize ()
+  "Turn ANSI codes in the current buffer into Emacs colors."
   (save-excursion
     (goto-char (point-min))
     (insert "[m")
     (ansi-color-apply-on-region (point-min) (point-max))))
 
 (defun kaocha-runner--insert (buffer s)
+  "Insert S into BUFFER, then turn ANSI codes into color."
   (with-current-buffer buffer
     (insert s)
     (kaocha-runner--colorize)))
 
 (defmacro kaocha-runner--with-window (buffer original-buffer &rest body)
+  "Open a dedicated window showing BUFFER, perform BODY, then switch back to ORIGINAL-BUFFER."
   (declare (debug (form body))
            (indent 2))
   `(let ((window (get-buffer-window ,buffer)))
@@ -77,6 +76,7 @@
      (switch-to-buffer-other-window original-buffer)))
 
 (defun kaocha-runner--fit-window-snuggly (min-height max-height)
+  "Resize current window to fit its contents, within MIN-HEIGHT and MAX-HEIGHT."
   (window-resize nil (- (max min-height
                              (min max-height
                                   (- (line-number-at-pos (point-max))
@@ -84,15 +84,18 @@
                         (window-height))))
 
 (defun kaocha-runner--recenter-top ()
+  "Change the scroll position so that the cursor is at the top of the window."
   (recenter (min (max 0 scroll-margin)
                  (truncate (/ (window-body-height) 4.0)))))
 
 (defun kaocha-runner--num-warnings ()
+  "Count the number of warnings in the error buffer."
   (s-count-matches "WARNING:"
                    (with-current-buffer kaocha-runner--err-buffer
                      (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun kaocha-runner--show-report (value current-ns)
+  "Show a message detailing the test run restult in VALUE, prefixed by CURRENT-NS."
   (when-let* ((result (parseedn-read-str (s-chop-prefix "#:kaocha.result" value))))
     (let* ((tests (gethash :count result))
            (pass (gethash :pass result))
@@ -118,9 +121,10 @@
                                (propertize warnings-str 'face '(:foreground "yellow"))))))
       (message "%s" report))))
 
-(setq kaocha-runner--fail-re "\\(FAIL\\|ERROR\\)")
+(defvar kaocha-runner--fail-re "\\(FAIL\\|ERROR\\)")
 
 (defun kaocha-runner--show-details-window (original-buffer min-height)
+  "Show details from the test run with a MIN-HEIGHT, but switch back to ORIGINAL-BUFFER afterwards."
   (kaocha-runner--with-window kaocha-runner--out-buffer original-buffer
     (visual-line-mode 1)
     (goto-char (point-min))
@@ -135,6 +139,12 @@
   "The invocation sent to the REPL to run kaocha tests, with the actual run replaced by %s.")
 
 (defun kaocha-runner--run-tests (&optional run-all? background?)
+  "Run kaocha tests.
+
+If RUN-ALL? is t, all tests are run, otherwise just run tests in
+the current namespace.
+
+If BACKGROUND? is t, we don't message when the tests start running."
   (interactive)
   (kaocha-runner--clear-buffer kaocha-runner--out-buffer)
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
@@ -177,6 +187,7 @@
            (kaocha-runner--show-details-window original-buffer 4)))))))
 
 (defun kaocha-runner-hide-windows ()
+  "Hide all windows that kaocha has opened."
   (interactive)
   (when (get-buffer kaocha-runner--out-buffer)
     (kill-buffer kaocha-runner--out-buffer))
@@ -184,12 +195,15 @@
     (kill-buffer kaocha-runner--err-buffer)))
 
 (defun kaocha-runner-run-tests (&optional run-all?)
-  "Run tests in the current namespace. With a prefix argument, run all tests."
+  "Run tests in the current namespace.
+Prefix argument RUN-ALL? runs all tests."
   (interactive "P")
   (kaocha-runner-hide-windows)
   (kaocha-runner--run-tests run-all?))
 
 (defun kaocha-runner-show-warnings (&optional switch-to-buffer?)
+  "Display warnings from the last kaocha test run.
+Prefix argument SWITCH-TO-BUFFER? opens a separate window."
   (interactive "P")
   (if switch-to-buffer?
       (switch-to-buffer-other-window kaocha-runner--err-buffer)
