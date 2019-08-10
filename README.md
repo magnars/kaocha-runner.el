@@ -21,7 +21,7 @@ skip that if you want to run it from the repl.
 
 ## Usage
 
-Kaocha runner exposes three commands:
+Kaocha runner exposes four commands:
 
 - `kaocha-runner-run-tests`
 
@@ -34,8 +34,8 @@ Kaocha runner exposes three commands:
 
 - `kaocha-runner-show-warnings`
 
-   If you get any warnings from Kaocha, the report will just say *1 warning*.
-   You can display this warning with this command. Given a prefix argument, it
+   If you get any warnings from Kaocha, the report will just say *X warnings*.
+   You can display them with this command. Given a prefix argument, it
    displays the warnings in a separate window.
 
 - `kaocha-runner-hide-windows`
