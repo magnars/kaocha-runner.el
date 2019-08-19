@@ -46,6 +46,21 @@
   :group 'kaocha-runner
   :type 'string)
 
+(defface kaocha-runner-success-face
+  '((t (:foreground "green")))
+  "Face used to highlight success messages."
+  :group 'kaocha-runner)
+
+(defface kaocha-runner-error-face
+  '((t (:foreground "red")))
+  "Face used to highlight error messages."
+  :group 'kaocha-runner)
+
+(defface kaocha-runner-warning-face
+  '((t (:foreground "yellow")))
+  "Face used to highlight warning messages."
+  :group 'kaocha-runner)
+
 (defun kaocha-runner--eval-clojure-code (code callback)
   "Send CODE to be evaled and run to CIDER, calling CALLBACK with updates."
   (cider-nrepl-request:eval
@@ -131,12 +146,12 @@
                                                  "")
                                                fail)
                                        'face (if happy?
-                                                 '(:foreground "green")
-                                               '(:foreground "red"))))))
+                                                 'kaocha-runner-success-face
+                                               'kaocha-runner-error-face)))))
       (when (< 0 warnings)
         (let ((warnings-str (format "(%s warnings)" warnings)))
           (setq report (concat report (s-repeat (max 3 (- (frame-width) (length report) (length warnings-str))) " ")
-                               (propertize warnings-str 'face '(:foreground "yellow"))))))
+                               (propertize warnings-str 'face 'kaocha-runner-warning-face)))))
       (message "%s" report))))
 
 (defvar kaocha-runner--fail-re "\\(FAIL\\|ERROR\\)")
