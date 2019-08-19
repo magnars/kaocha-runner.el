@@ -21,11 +21,15 @@ skip that if you want to run it from the repl.
 
 ## Usage
 
-Kaocha runner exposes four commands:
+Kaocha runner exposes the following commands:
+
+- `kaocha-runner-run-test-at-point`
+
+   Runs the test at point in the current namespace.
 
 - `kaocha-runner-run-tests`
 
-   Runs tests in the current namespace. With a prefix argument, it runs all tests.
+   Runs tests in the current namespace. With a prefix argument, it runs test id provided by the user.
 
 - `kaocha-runner-run-all-tests`
 
@@ -49,6 +53,7 @@ Kaocha runner exposes four commands:
 Pick your own. Here are mine:
 
 ```cl
+(define-key clojure-mode-map (kbd "C-c k t") 'kaocha-runner-run-test)
 (define-key clojure-mode-map (kbd "C-c k r") 'kaocha-runner-run-tests)
 (define-key clojure-mode-map (kbd "C-c k a") 'kaocha-runner-run-all-tests)
 (define-key clojure-mode-map (kbd "C-c k w") 'kaocha-runner-show-warnings)

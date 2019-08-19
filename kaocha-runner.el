@@ -66,9 +66,8 @@
   (cider-nrepl-request:eval
    code
    callback
-   (cider-current-ns)
-   nil nil nil
-   (cider-current-repl nil 'ensure)))
+   nil nil nil nil
+   (cider-current-repl 'clj 'ensure)))
 
 (defvar kaocha-runner--out-buffer "*kaocha-output*")
 (defvar kaocha-runner--err-buffer "*kaocha-error*")
@@ -125,8 +124,8 @@
                    (with-current-buffer kaocha-runner--err-buffer
                      (buffer-substring-no-properties (point-min) (point-max)))))
 
-(defun kaocha-runner--show-report (value current-ns)
-  "Show a message detailing the test run restult in VALUE, prefixed by CURRENT-NS."
+(defun kaocha-runner--show-report (value testable-sym)
+  "Show a message detailing the test run restult in VALUE, prefixed by TESTABLE-SYM"
   (when-let* ((result (parseedn-read-str (s-chop-prefix "#:kaocha.result" value))))
     (let* ((tests (gethash :count result))
            (pass (gethash :pass result))
@@ -135,8 +134,8 @@
            (warnings (kaocha-runner--num-warnings))
            (happy? (and (= 0 fail) (= 0 err)))
            (report (format "%s%s"
-                           (if current-ns
-                               (concat "[" current-ns "] ")
+                           (if testable-sym
+                               (concat "[" testable-sym "] ")
                              "")
                            (propertize (format "%s tests, %s assertions%s, %s failures."
                                                tests
@@ -167,11 +166,17 @@
     (kaocha-runner--fit-window-snuggly min-height 16)
     (kaocha-runner--recenter-top)))
 
-(defun kaocha-runner--run-tests (&optional run-all? background?)
+(defun kaocha-runner--testable-sym (ns test-name cljs?)
+  (concat "'"
+          (if cljs? "cljs:" "")
+          ns
+          (when test-name (concat "/" test-name))))
+
+(defun kaocha-runner--run-tests (testable-sym &optional run-all? background?)
   "Run kaocha tests.
 
-If RUN-ALL? is t, all tests are run, otherwise just run tests in
-the current namespace.
+If RUN-ALL? is t, all tests are run, otherwise attempt a run with the provided
+TESTABLEY-SYM. In practice TESTABLEY-SYM can be a test id, an ns or an ns/test-fn.
 
 If BACKGROUND? is t, we don't message when the tests start running."
   (interactive)
@@ -179,12 +184,13 @@ If BACKGROUND? is t, we don't message when the tests start running."
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
   (kaocha-runner--eval-clojure-code
    (format kaocha-runner-repl-invocation-template
-           (format (if run-all?
-                       "(kaocha.repl/run-all %s)"
-                     "(kaocha.repl/run %s)")
-                   kaocha-runner-extra-configuration))
-   (let ((current-ns (cider-current-ns))
-         (original-buffer (current-buffer))
+           (if run-all?
+               (format "(kaocha.repl/run-all %s)" kaocha-runner-extra-configuration)
+             (format
+              "(kaocha.repl/run %s %s)"
+              testable-sym
+              kaocha-runner-extra-configuration)))
+   (let ((original-buffer (current-buffer))
          (done? nil)
          (any-errors? nil)
          (shown-details? nil)
@@ -193,7 +199,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
      (unless background?
        (if run-all?
            (message "Running all tests ...")
-         (message "[%s] Running tests ..." current-ns)))
+         (message "[%s] Running tests ..." testable-sym)))
      (lambda (response)
        (nrepl-dbind-response response (value out err status)
          (when out
@@ -213,7 +219,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
            (setq done? t))
          (when done?
            (if the-value
-               (kaocha-runner--show-report the-value (unless run-all? current-ns))
+               (kaocha-runner--show-report the-value (unless run-all? testable-sym))
              (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
                (message "Kaocha run failed. See error window for details.")
                (switch-to-buffer-other-window kaocha-runner--err-buffer))))
@@ -230,19 +236,31 @@ If BACKGROUND? is t, we don't message when the tests start running."
     (kill-buffer kaocha-runner--err-buffer)))
 
 ;;;###autoload
-(defun kaocha-runner-run-tests (&optional run-all?)
+(defun kaocha-runner-run-tests (&optional test-id?)
   "Run tests in the current namespace.
-Prefix argument RUN-ALL? runs all tests."
+If prefix argument TEST-ID? is present ask user for a test-id to run."
   (interactive "P")
   (kaocha-runner-hide-windows)
-  (kaocha-runner--run-tests run-all?))
+  (let ((test-id (when test-id? (read-from-minibuffer "test id: "))))
+      (kaocha-runner--run-tests
+       (if test-id
+           test-id
+         (kaocha-runner--testable-sym (cider-current-ns) nil (eq major-mode 'clojurescript-mode))))))
+
+;;;###autoload
+(defun kaocha-runner-run-test-at-point ()
+  "Run the test at point in the current namespace."
+  (interactive)
+  (kaocha-runner-hide-windows)
+  (kaocha-runner--run-tests
+   (kaocha-runner--testable-sym (cider-current-ns) (cadr (clojure-find-def)) (eq major-mode 'clojurescript-mode))))
 
 ;;;###autoload
 (defun kaocha-runner-run-all-tests ()
   "Run all tests."
   (interactive)
   (kaocha-runner-hide-windows)
-  (kaocha-runner--run-tests t))
+  (kaocha-runner--run-tests nil t))
 
 ;;;###autoload
 (defun kaocha-runner-show-warnings (&optional switch-to-buffer?)
