@@ -53,7 +53,7 @@ Kaocha runner exposes the following commands:
 Pick your own. Here are mine:
 
 ```cl
-(define-key clojure-mode-map (kbd "C-c k t") 'kaocha-runner-run-test)
+(define-key clojure-mode-map (kbd "C-c k t") 'kaocha-runner-run-test-at-point)
 (define-key clojure-mode-map (kbd "C-c k r") 'kaocha-runner-run-tests)
 (define-key clojure-mode-map (kbd "C-c k a") 'kaocha-runner-run-all-tests)
 (define-key clojure-mode-map (kbd "C-c k w") 'kaocha-runner-show-warnings)
