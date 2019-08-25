@@ -88,6 +88,22 @@ include a reset of your choice.
 Also, if you want to shave ~150ms from each test run, you can remove the require
 from the template. In that case, you'll have to require it yourself.
 
+You can also customise the tests, failure, and details window heights by setting
+the following custom vars to the desired value:
+
+- `kaocha-runner-ongoing-tests-win-min-height`
+
+The minimum height in lines of the output window. The window is show when tests
+are taking long to run, to show the ongoing progress from kaocha.
+
+- `kaocha-runner-failure-win-min-height`
+
+The minimum height in lines of the failure window.
+
+- `kaocha-runner-details-win-max-height`
+
+The maximum height in lines of the details window.
+
 ## License
 
 Copyright (C) 2019 Magnar Sveen
