@@ -61,9 +61,9 @@ This is to show the ongoing progress from kaocha."
   :type 'integer
   :package-version '(kaocha-runner . "0.2.0"))
 
-(defcustom kaocha-runner-details-win-max-height
+(defcustom kaocha-runner-output-win-max-height
   16
-  "The maximum height in lines of the details window."
+  "The maximum height in lines of the output window."
   :group 'kaocha-runner
   :type 'integer
   :package-version '(kaocha-runner . "0.2.0"))
@@ -185,7 +185,7 @@ This is to show the ongoing progress from kaocha."
     (let ((case-fold-search nil))
       (re-search-forward kaocha-runner--fail-re nil t))
     (end-of-line)
-    (kaocha-runner--fit-window-snuggly min-height kaocha-runner-details-win-max-height)
+    (kaocha-runner--fit-window-snuggly min-height kaocha-runner-output-win-max-height)
     (kaocha-runner--recenter-top)))
 
 (defun kaocha-runner--testable-sym (ns test-name cljs?)

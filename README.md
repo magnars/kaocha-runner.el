@@ -102,9 +102,9 @@ the following custom vars to the desired value:
 
     The minimum height in lines of the output window when there are failing tests.
 
-- `kaocha-runner-details-win-max-height`
+- `kaocha-runner-output-win-max-height`
 
-    The maximum height in lines of the details window.
+    The maximum height in lines of the output window.
 
 ## License
 
