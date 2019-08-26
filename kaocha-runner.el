@@ -46,6 +46,28 @@
   :group 'kaocha-runner
   :type 'string)
 
+(defcustom kaocha-runner-ongoing-tests-win-min-height
+  12
+  "The minimum height in lines of the output window when tests are taking long to run.
+This is to show the ongoing progress from kaocha."
+  :group 'kaocha-runner
+  :type 'integer
+  :package-version '(kaocha-runner . "0.2.0"))
+
+(defcustom kaocha-runner-failure-win-min-height
+  4
+  "The minimum height in lines of the output window when there are failing tests."
+  :group 'kaocha-runner
+  :type 'integer
+  :package-version '(kaocha-runner . "0.2.0"))
+
+(defcustom kaocha-runner-output-win-max-height
+  16
+  "The maximum height in lines of the output window."
+  :group 'kaocha-runner
+  :type 'integer
+  :package-version '(kaocha-runner . "0.2.0"))
+
 (defface kaocha-runner-success-face
   '((t (:foreground "green")))
   "Face used to highlight success messages."
@@ -163,7 +185,7 @@
     (let ((case-fold-search nil))
       (re-search-forward kaocha-runner--fail-re nil t))
     (end-of-line)
-    (kaocha-runner--fit-window-snuggly min-height 16)
+    (kaocha-runner--fit-window-snuggly min-height kaocha-runner-output-win-max-height)
     (kaocha-runner--recenter-top)))
 
 (defun kaocha-runner--testable-sym (ns test-name cljs?)
@@ -210,7 +232,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
            (when (and (< 1 (- (float-time) start-time))
                       (not shown-details?))
              (setq shown-details? t)
-             (kaocha-runner--show-details-window original-buffer 12)))
+             (kaocha-runner--show-details-window original-buffer kaocha-runner-ongoing-tests-win-min-height)))
          (when err
            (kaocha-runner--insert kaocha-runner--err-buffer err))
          (when value
@@ -224,7 +246,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
                (message "Kaocha run failed. See error window for details.")
                (switch-to-buffer-other-window kaocha-runner--err-buffer))))
          (when (and done? any-errors?)
-           (kaocha-runner--show-details-window original-buffer 4)))))))
+           (kaocha-runner--show-details-window original-buffer kaocha-runner-failure-win-min-height)))))))
 
 ;;;###autoload
 (defun kaocha-runner-hide-windows ()
