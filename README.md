@@ -90,6 +90,20 @@ from the template. In that case, you'll have to require it yourself.
 
 ### Visual customisation
 
+If the default red/green/yellow doesn't work for you, the faces are customisable:
+
+- `kaocha-runner-success-face`
+
+    Face used to highlight success messages.
+
+- `kaocha-runner-error-face`
+
+    Face used to highlight error messages.
+
+- `kaocha-runner-warning-face`
+
+    Face used to highlight warning messages.
+
 You can also customise the tests, failure, and details window heights by setting
 the following custom vars to the desired value:
 
