@@ -95,8 +95,8 @@ the following custom vars to the desired value:
 
 - `kaocha-runner-ongoing-tests-win-min-height`
 
-    The minimum height in lines of the output window when tests
-    are taking long to run, to show the ongoing progress from kaocha.
+    The minimum height in lines of the output window when tests are taking long
+    to run. This is to show the ongoing progress from kaocha.
 
 - `kaocha-runner-failure-win-min-height`
 
