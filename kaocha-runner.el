@@ -48,16 +48,15 @@
 
 (defcustom kaocha-runner-ongoing-tests-win-min-height
   12
-  "The minimum height in lines of the output window.
-The window is show when tests are taking long to run, to show the
-ongoing progress from kaocha."
+  "The minimum height in lines of the output window when tests are taking long to run.
+This is to show the ongoing progress from kaocha."
   :group 'kaocha-runner
   :type 'integer
   :package-version '(kaocha-runner . "0.2.0"))
 
 (defcustom kaocha-runner-failure-win-min-height
   4
-  "The minimum height in lines of the failure window."
+  "The minimum height in lines of the output window when there are failing tests."
   :group 'kaocha-runner
   :type 'integer
   :package-version '(kaocha-runner . "0.2.0"))
