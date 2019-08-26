@@ -104,7 +104,7 @@ If the default red/green/yellow doesn't work for you, the faces are customisable
 
     Face used to highlight warning messages.
 
-You can also customise the tests, failure, and details window heights by setting
+You can also customise the tests, failure, and output window heights by setting
 the following custom vars to the desired value:
 
 - `kaocha-runner-ongoing-tests-win-min-height`
