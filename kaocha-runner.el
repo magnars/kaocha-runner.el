@@ -46,6 +46,13 @@
   :group 'kaocha-runner
   :type 'string)
 
+(defcustom kaocha-runner-long-running-seconds
+  3
+  "After a test run has taken this many seconds, pop up the output window to see what is going on."
+  :group 'kaocha-runner
+  :type 'integer
+  :package-version '(kaocha-runner . "0.3.0"))
+
 (defcustom kaocha-runner-ongoing-tests-win-min-height
   12
   "The minimum height in lines of the output window when tests are taking long to run.
@@ -229,7 +236,8 @@ If BACKGROUND? is t, we don't message when the tests start running."
            (when (let ((case-fold-search nil))
                    (string-match-p kaocha-runner--fail-re out))
              (setq any-errors? t))
-           (when (and (< 1 (- (float-time) start-time))
+           (when (and (< kaocha-runner-long-running-seconds
+                         (- (float-time) start-time))
                       (not shown-details?))
              (setq shown-details? t)
              (kaocha-runner--show-details-window original-buffer kaocha-runner-ongoing-tests-win-min-height)))
