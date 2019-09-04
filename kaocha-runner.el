@@ -201,6 +201,11 @@ This is to show the ongoing progress from kaocha."
           ns
           (when test-name (concat "/" test-name))))
 
+(defun kaocha-runner--hide-window (buffer-name)
+  (when-let (buffer (get-buffer buffer-name))
+    (when-let (window (get-buffer-window buffer))
+      (delete-window window))))
+
 (defun kaocha-runner--run-tests (testable-sym &optional run-all? background? original-buffer)
   "Run kaocha tests.
 
@@ -255,17 +260,17 @@ Given an ORIGINAL-BUFFER, use that instead of (current-buffer) when switching ba
              (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
                (message "Kaocha run failed. See error window for details.")
                (switch-to-buffer-other-window kaocha-runner--err-buffer))))
-         (when (and done? any-errors?)
-           (kaocha-runner--show-details-window original-buffer kaocha-runner-failure-win-min-height)))))))
+         (when done?
+           (if any-errors?
+               (kaocha-runner--show-details-window original-buffer kaocha-runner-failure-win-min-height)
+             (kaocha-runner--hide-window kaocha-runner--out-buffer))))))))
 
 ;;;###autoload
 (defun kaocha-runner-hide-windows ()
   "Hide all windows that kaocha has opened."
   (interactive)
-  (when (get-buffer kaocha-runner--out-buffer)
-    (kill-buffer kaocha-runner--out-buffer))
-  (when (get-buffer kaocha-runner--err-buffer)
-    (kill-buffer kaocha-runner--err-buffer)))
+  (kaocha-runner--hide-window kaocha-runner--out-buffer)
+  (kaocha-runner--hide-window kaocha-runner--err-buffer))
 
 ;;;###autoload
 (defun kaocha-runner-run-tests (&optional test-id?)
@@ -274,10 +279,10 @@ If prefix argument TEST-ID? is present ask user for a test-id to run."
   (interactive "P")
   (kaocha-runner-hide-windows)
   (let ((test-id (when test-id? (read-from-minibuffer "test id: "))))
-      (kaocha-runner--run-tests
-       (if test-id
-           test-id
-         (kaocha-runner--testable-sym (cider-current-ns) nil (eq major-mode 'clojurescript-mode))))))
+    (kaocha-runner--run-tests
+     (if test-id
+         test-id
+       (kaocha-runner--testable-sym (cider-current-ns) nil (eq major-mode 'clojurescript-mode))))))
 
 ;;;###autoload
 (defun kaocha-runner-run-test-at-point ()
