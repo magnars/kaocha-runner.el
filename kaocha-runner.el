@@ -201,13 +201,15 @@ This is to show the ongoing progress from kaocha."
           ns
           (when test-name (concat "/" test-name))))
 
-(defun kaocha-runner--run-tests (testable-sym &optional run-all? background?)
+(defun kaocha-runner--run-tests (testable-sym &optional run-all? background? original-buffer)
   "Run kaocha tests.
 
 If RUN-ALL? is t, all tests are run, otherwise attempt a run with the provided
 TESTABLEY-SYM. In practice TESTABLEY-SYM can be a test id, an ns or an ns/test-fn.
 
-If BACKGROUND? is t, we don't message when the tests start running."
+If BACKGROUND? is t, we don't message when the tests start running.
+
+Given an ORIGINAL-BUFFER, use that instead of (current-buffer) when switching back."
   (interactive)
   (kaocha-runner--clear-buffer kaocha-runner--out-buffer)
   (kaocha-runner--clear-buffer kaocha-runner--err-buffer)
@@ -219,7 +221,7 @@ If BACKGROUND? is t, we don't message when the tests start running."
               "(kaocha.repl/run %s %s)"
               testable-sym
               kaocha-runner-extra-configuration)))
-   (let ((original-buffer (current-buffer))
+   (let ((original-buffer (or original-buffer (current-buffer)))
          (done? nil)
          (any-errors? nil)
          (shown-details? nil)
