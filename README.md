@@ -31,8 +31,7 @@ Kaocha runner exposes the following commands:
 
 - `kaocha-runner-run-all-tests`
 
-   If you want to bind a key for running all tests directly, without having to
-   prefix it, this is the command for you.
+   Runs all tests in the project.
 
 - `kaocha-runner-show-warnings`
 
