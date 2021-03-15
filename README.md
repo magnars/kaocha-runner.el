@@ -64,6 +64,7 @@ With `use-package` you can try:
 (bind-keys :prefix-map ar-emacs-kaocha-prefix-map
              :prefix "C-c k"
              ("t" . kaocha-runner-run-test-at-point)
+             ("r" . kaocha-runner-run-tests)
              ("a" . kaocha-runner-run-all-tests)
              ("w" . kaocha-runner-show-warnings)
              ("h" . kaocha-runner-hide-windows))
