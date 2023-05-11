@@ -155,7 +155,10 @@ This is to show the ongoing progress from kaocha."
 
 (defun kaocha-runner--show-report (value testable-sym)
   "Show a message detailing the test run restult in VALUE, prefixed by TESTABLE-SYM"
-  (when-let* ((result (parseedn-read-str (s-chop-prefix "#:kaocha.result" value))))
+  (when-let* ((result (parseedn-read-str
+                       (s-with value
+                         (s-chop-prefix "#:kaocha.result" )
+                         (s-replace ":kaocha.result/" ":")))))
     (let* ((tests (gethash :count result))
            (pass (gethash :pass result))
            (fail (gethash :fail result))
