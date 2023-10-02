@@ -13,6 +13,11 @@ It is available on [melpa](http://melpa.milkbox.net/):
 
     M-x package-install kaocha-runner
 
+or
+
+    (use-package kaocha-runner
+      :after (cider-mode))
+
 Note that you must include kaocha in your dev dependencies for this to run in
 the repl. The kaocha docs suggests creating a separate `:kaocha` profile, but
 skip that if you want to run it from the repl.
@@ -57,17 +62,17 @@ Pick your own. Here are mine:
 (define-key clojure-mode-map (kbd "C-c k h") 'kaocha-runner-hide-windows)
 ```
 
-With `use-package` you can try:
+With `use-package`, something like:
 
 ```cl
-:init
-(bind-keys :prefix-map ar-emacs-kaocha-prefix-map
-             :prefix "C-c k"
-             ("t" . kaocha-runner-run-test-at-point)
-             ("r" . kaocha-runner-run-tests)
-             ("a" . kaocha-runner-run-all-tests)
-             ("w" . kaocha-runner-show-warnings)
-             ("h" . kaocha-runner-hide-windows))
+(use-package kaocha-runner
+  :after (cider-mode)
+  :bind (:map clojure-mode-map
+              ("C-c k t" . kaocha-runner-run-test-at-point)
+              ("C-c k r" . kaocha-runner-run-tests)
+              ("C-c k a" . kaocha-runner-run-all-tests)
+              ("C-c k w" . kaocha-runner-show-warnings)
+              ("C-c k h" . kaocha-runner-hide-windows)))
 ```
 
 ## Configuration
