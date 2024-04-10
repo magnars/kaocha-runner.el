@@ -155,48 +155,49 @@ This is to show the ongoing progress from kaocha."
 
 (defun kaocha-runner--show-report (value testable-sym)
   "Show a message detailing the test run restult in VALUE, prefixed by TESTABLE-SYM"
-  (when-let* ((result (parseedn-read-str
-                       (s-with value
-                         (s-chop-prefix "#:kaocha.result" )
-                         (s-replace ":kaocha.result/" ":")))))
-    (let* ((tests (gethash :count result))
-           (pass (gethash :pass result))
-           (fail (gethash :fail result))
-           (err (gethash :error result))
-           (warnings (kaocha-runner--num-warnings))
-           (happy? (and (= 0 fail) (= 0 err)))
-           (report (format "%s%s"
-                           (if testable-sym
-                               (concat "[" testable-sym "] ")
-                             "")
-                           (propertize (format "%s tests, %s assertions%s, %s failures."
-                                               tests
-                                               (+ pass fail err)
-                                               (if (< 0 err)
-                                                   (format ", %s errors" err)
-                                                 "")
-                                               fail)
-                                       'face (if happy?
-                                                 'kaocha-runner-success-face
-                                               'kaocha-runner-error-face)))))
-      (when (< 0 warnings)
-        (let ((warnings-str (format "(%s warnings)" warnings)))
-          (setq report (concat report (s-repeat (max 3 (- (frame-width) (length report) (length warnings-str))) " ")
-                               (propertize warnings-str 'face 'kaocha-runner-warning-face)))))
-      (message "%s" report))))
+  (unless (s-equals? value "0") ;; no result
+    (when-let* ((result (parseedn-read-str
+                         (s-with value
+                           (s-chop-prefix "#:kaocha.result" )
+                           (s-replace ":kaocha.result/" ":")))))
+      (let* ((tests (gethash :count result))
+             (pass (gethash :pass result))
+             (fail (gethash :fail result))
+             (err (gethash :error result))
+             (warnings (kaocha-runner--num-warnings))
+             (happy? (and (= 0 fail) (= 0 err)))
+             (report (format "%s%s"
+                             (if testable-sym
+                                 (concat "[" testable-sym "] ")
+                               "")
+                             (propertize (format "%s tests, %s assertions%s, %s failures."
+                                                 tests
+                                                 (+ pass fail err)
+                                                 (if (< 0 err)
+                                                     (format ", %s errors" err)
+                                                   "")
+                                                 fail)
+                                         'face (if happy?
+                                                   'kaocha-runner-success-face
+                                                 'kaocha-runner-error-face)))))
+        (when (< 0 warnings)
+          (let ((warnings-str (format "(%s warnings)" warnings)))
+            (setq report (concat report (s-repeat (max 3 (- (frame-width) (length report) (length warnings-str))) " ")
+                                 (propertize warnings-str 'face 'kaocha-runner-warning-face)))))
+        (message "%s" report)))))
 
 (defvar kaocha-runner--fail-re "\\(FAIL\\|ERROR\\)")
 
 (defun kaocha-runner--show-details-window (original-buffer min-height)
   "Show details from the test run with a MIN-HEIGHT, but switch back to ORIGINAL-BUFFER afterwards."
   (kaocha-runner--with-window kaocha-runner--out-buffer original-buffer
-    (visual-line-mode 1)
-    (goto-char (point-min))
-    (let ((case-fold-search nil))
-      (re-search-forward kaocha-runner--fail-re nil t))
-    (end-of-line)
-    (kaocha-runner--fit-window-snuggly min-height kaocha-runner-output-win-max-height)
-    (kaocha-runner--recenter-top)))
+                              (visual-line-mode 1)
+                              (goto-char (point-min))
+                              (let ((case-fold-search nil))
+                                (re-search-forward kaocha-runner--fail-re nil t))
+                              (end-of-line)
+                              (kaocha-runner--fit-window-snuggly min-height kaocha-runner-output-win-max-height)
+                              (kaocha-runner--recenter-top)))
 
 (defun kaocha-runner--testable-sym (ns test-name cljs?)
   (concat "'"
