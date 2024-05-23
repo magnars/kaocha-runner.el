@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 Magnar Sveen
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
-;; Version: 0.3.1
+;; Version: 0.3.2
 ;; Package-Requires: ((emacs "26") (s "1.4.0") (cider "0.21.0") (parseedn "0.1.0"))
 ;; URL: https://github.com/magnars/kaocha-runner.el
 
