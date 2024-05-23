@@ -217,6 +217,8 @@ This is to show the ongoing progress from kaocha."
     (when-let (window (get-buffer-window buffer))
       (delete-window window))))
 
+(defvar kaocha-runner--current-run-index 0)
+
 (defun kaocha-runner--run-tests (testable-sym &optional run-all? background? original-buffer)
   "Run kaocha tests.
 
