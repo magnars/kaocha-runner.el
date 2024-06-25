@@ -253,39 +253,39 @@ Given an ORIGINAL-BUFFER, use that instead of (current-buffer) when switching ba
          (message "[%s] Running tests ..." testable-sym)))
      (lambda (response)
        (nrepl-dbind-response response (value out err status)
-         (when (< kaocha-runner-too-long-running-seconds
-                  (- (float-time) start-time))
-           (message "Kaocha run timed out after %s seconds." kaocha-runner-too-long-running-seconds)
-           (setq done? t))
-         (when (and (not done?)
-                    (= kaocha-runner--current-run-index
-                       my-run-index))
-           (when out
-             (kaocha-runner--insert kaocha-runner--out-buffer out)
-             (when (let ((case-fold-search nil))
-                     (string-match-p kaocha-runner--fail-re out))
-               (setq any-errors? t))
-             (when (and (< kaocha-runner-long-running-seconds
-                           (- (float-time) start-time))
-                        (not shown-details?))
-               (setq shown-details? t)
-               (kaocha-runner--show-details-window original-buffer kaocha-runner-ongoing-tests-win-min-height)))
-           (when err
-             (kaocha-runner--insert kaocha-runner--err-buffer err))
-           (when value
-             (setq the-value value))
-           (when (and status (member "done" status))
+         (when (not done?)
+           (when (< kaocha-runner-too-long-running-seconds
+                    (- (float-time) start-time))
+             (message "Kaocha run timed out after %s seconds." kaocha-runner-too-long-running-seconds)
              (setq done? t))
-           (when done?
-             (if the-value
-                 (kaocha-runner--show-report the-value (unless run-all? testable-sym))
-               (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
-                 (message "Kaocha run failed. See error window for details.")
-                 (switch-to-buffer-other-window kaocha-runner--err-buffer))))
-           (when done?
-             (if any-errors?
-                 (kaocha-runner--show-details-window original-buffer kaocha-runner-failure-win-min-height)
-               (kaocha-runner--hide-window kaocha-runner--out-buffer)))))))))
+           (when (= kaocha-runner--current-run-index
+                    my-run-index)
+             (when out
+               (kaocha-runner--insert kaocha-runner--out-buffer out)
+               (when (let ((case-fold-search nil))
+                       (string-match-p kaocha-runner--fail-re out))
+                 (setq any-errors? t))
+               (when (and (< kaocha-runner-long-running-seconds
+                             (- (float-time) start-time))
+                          (not shown-details?))
+                 (setq shown-details? t)
+                 (kaocha-runner--show-details-window original-buffer kaocha-runner-ongoing-tests-win-min-height)))
+             (when err
+               (kaocha-runner--insert kaocha-runner--err-buffer err))
+             (when value
+               (setq the-value value))
+             (when (and status (member "done" status))
+               (setq done? t))
+             (when done?
+               (if the-value
+                   (kaocha-runner--show-report the-value (unless run-all? testable-sym))
+                 (unless (get-buffer-window kaocha-runner--err-buffer 'visible)
+                   (message "Kaocha run failed. See error window for details.")
+                   (switch-to-buffer-other-window kaocha-runner--err-buffer))))
+             (when done?
+               (if any-errors?
+                   (kaocha-runner--show-details-window original-buffer kaocha-runner-failure-win-min-height)
+                 (kaocha-runner--hide-window kaocha-runner--out-buffer))))))))))
 
 ;;;###autoload
 (defun kaocha-runner-hide-windows ()
